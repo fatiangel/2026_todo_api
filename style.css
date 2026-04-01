@@ -1,0 +1,66 @@
+let todos = [];
+
+// 核心函式：模擬 API 觸發監控面板
+function apiCall(method, path, data, status = 200) {
+    // 1. 動畫效果
+    const dot = document.getElementById('dot');
+    dot.style.left = "100%";
+    setTimeout(() => { dot.style.left = "0%"; }, 500);
+
+    // 2. 更新 JSON 顯示
+    const jsonDisplay = document.getElementById('json-display');
+    jsonDisplay.textContent = JSON.stringify({ status: true, data: data }, null, 2);
+
+    // 3. 增加紀錄
+    const logList = document.getElementById('log-list');
+    const logItem = document.createElement('li');
+    logItem.style.cssText = "display:flex; justify-content:space-between; font-size:0.8rem; padding:5px 0; border-bottom:1px solid #2d3748; list-style:none;";
+    logItem.innerHTML = `
+        <span><b style="color:#4299e1">${method}</b> ${path}</span>
+        <span style="color:#48bb78">${status} OK</span>
+    `;
+    logList.prepend(logItem);
+}
+
+// 新增功能
+document.getElementById('add-btn').onclick = () => {
+    const input = document.getElementById('todo-input');
+    const content = input.value.trim();
+    if (!content) return;
+
+    const newTodo = { id: Date.now(), content: content };
+    todos.push(newTodo);
+    
+    // 呼叫模擬 API
+    apiCall('POST', '/todos/', newTodo, 201);
+    
+    input.value = '';
+    render();
+};
+
+// 刪除功能
+window.deleteTodo = (id) => {
+    todos = todos.filter(t => t.id !== id);
+    apiCall('DELETE', `/todos/${id}`, { message: "刪除成功" });
+    render();
+};
+
+// 渲染畫面
+function render() {
+    const list = document.getElementById('todo-list');
+    const count = document.getElementById('tab-all');
+    
+    count.innerText = `全部 (${todos.length})`;
+
+    if (todos.length === 0) {
+        list.innerHTML = '<p class="empty-text" style="text-align:center; color:#a0aec0; margin-top:50px;">還沒有待辦事項，新增一筆吧！</p>';
+        return;
+    }
+
+    list.innerHTML = todos.map(t => `
+        <div class="todo-item">
+            <span>${t.content}</span>
+            <button onclick="deleteTodo(${t.id})" style="color:#f56565; border:none; background:none; cursor:pointer;">刪除</button>
+        </div>
+    `).join('');
+}

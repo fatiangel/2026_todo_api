@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo API 教學工具 - 完整還原模擬版</title>
+    <style>
+      /* === 樣式實作：還原深色主題與兩欄佈局 === */
+      :root {
+        --primary: #667eea;
+        --success: #48bb78;
+        --bg-main: #f7fafc;
+        --bg-dark: #1a202c;
+        --text-gray: #718096;
+      }
+
+      body {
+        background-color: var(--bg-main);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .page-title {
+        text-align: center;
+        color: var(--bg-dark);
+        margin-bottom: 30px;
+      }
+
+      /* 核心佈局 */
+      .main-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        min-height: 500px;
+      }
+
+      /* 右側監控面板樣式 */
+      .monitor-card {
+        background-color: var(--bg-dark);
+        color: #cbd5e0;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      /* UI 元件 */
+      .input-group {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      input {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+      }
+      #add-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0 24px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .tab-group {
+        display: flex;
+        border-bottom: 1px solid #edf2f7;
+        margin-bottom: 20px;
+        gap: 10px;
+      }
+      .tab {
+        padding: 10px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        color: var(--text-gray);
+      }
+      .tab.active {
+        color: var(--primary);
+        border-bottom: 2px solid var(--primary);
+      }
+
+      /* 監控動畫區塊 */
+      .animation-view {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        margin: 40px 0;
+      }
+      .node {
+        text-align: center;
+        font-size: 0.9rem;
+      }
+      .line {
+        flex: 1;
+        height: 2px;
+        background: #2d3748;
+        position: relative;
+        margin: 0 20px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        background: var(--success);
+        border-radius: 50%;
+        position: absolute;
+        left: 0;
+        top: -4px;
+        transition: 0.5s;
+      }
+
+      /* 回應區塊 */
+      pre {
+        background: #2d3748;
+        padding: 16px;
+        border-radius: 8px;
+        color: var(--success);
+        overflow-x: auto;
+        font-family: monospace;
+      }
+      .endpoint-badge {
+        background: #2d3748;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+      }
+      .method {
+        color: #4299e1;
+        font-weight: bold;
+        margin-right: 5px;
+      }
+
+      /* 請求紀錄 */
+      .history-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #2d3748;
+        font-size: 0.85rem;
+      }
+
+      /* 手機版調整 */
+      @media (max-width: 768px) {
+        .main-layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="page-title">Todo API 教學工具</h1>
+
+    <div class="main-layout">
+      <section class="card">
+        <div class="card-header">
+          <h2>待辦事項</h2>
+          <button
+            style="color: var(--text-gray); border: none; background: none"
+          >
+            登出
+          </button>
+        </div>
+        <div class="input-group">
+          <input type="text" id="todo-input" placeholder="新增待辦事項..." />
+          <button id="add-btn">新增</button>
+        </div>
+        <div class="tab-group">
+          <button class="tab active">全部 (0)</button>
+          <button class="tab">待完成 (0)</button>
+          <button class="tab">已完成 (0)</button>
+        </div>
+        <div
+          id="todo-list"
+          style="text-align: center; color: var(--text-gray); margin-top: 40px"
+        >
+          還沒有待辦事項，新增一筆吧！
+        </div>
+      </section>
+
+      <section class="card monitor-card">
+        <div class="card-header">
+          <h2>API 運作監控</h2>
+          <span style="font-size: 0.8rem"
+            >慢速模式 <input type="checkbox"
+          /></span>
+        </div>
+
+        <div style="margin-bottom: 20px">
+          <p style="font-size: 0.7rem; color: var(--text-gray)">API ENDPOINT</p>
+          <div class="endpoint-badge">
+            <span class="method">GET</span> /todos/
+          </div>
+        </div>
+
+        <div class="animation-view">
+          <div class="node">🌐 瀏覽器</div>
+          <div class="line"><div id="anim-dot" class="dot"></div></div>
+          <div class="node">🖥️ 伺服器</div>
+        </div>
+
+        <p style="font-size: 0.7rem; color: var(--text-gray)">回應</p>
+        <pre id="json-response">{ "status": true, "data": [] }</pre>
+
+        <p style="font-size: 0.7rem; color: var(--text-gray); margin-top: 20px">
+          請求紀錄
+        </p>
+        <div id="history-list"></div>
+      </section>
+    </div>
+
+    <script>
+      // === 邏輯實作：模擬 API 行為 ===
+      let todos = [];
+
+      function triggerAPI(method, endpoint, responseData) {
+        // 1. 動畫效果
+        const dot = document.getElementById("anim-dot");
+        dot.style.left = "100%";
+        setTimeout(() => {
+          dot.style.left = "0%";
+        }, 500);
+
+        // 2. 更新回應 JSON
+        document.getElementById("json-response").textContent = JSON.stringify(
+          {
+            status: true,
+            data: responseData,
+          },
+          null,
+          2,
+        );
+
+        // 3. 增加紀錄
+        const history = document.getElementById("history-list");
+        const item = document.createElement("div");
+        item.className = "history-item";
+        item.innerHTML = `<span><b style="color:#4299e1">${method}</b> ${endpoint}</span> <span style="color:#48bb78">200 OK</span>`;
+        history.prepend(item);
+      }
+
+      document.getElementById("add-btn").onclick = () => {
+        const input = document.getElementById("todo-input");
+        if (!input.value) return;
+
+        const newItem = { id: Date.now(), content: input.value };
+        todos.push(newItem);
+
+        // 執行模擬 API
+        triggerAPI("POST", "/todos/", newItem);
+
+        input.value = "";
+        renderTodos();
+      };
+
+      function renderTodos() {
+        const list = document.getElementById("todo-list");
+        if (todos.length === 0) {
+          list.innerHTML = "還沒有待辦事項，新增一筆吧！";
+          return;
+        }
+        list.innerHTML = todos
+          .map(
+            (t) => `
+                <div style="padding:12px; border-bottom:1px solid #edf2f7; display:flex; justify-content:space-between;">
+                    ${t.content}
+                    <button onclick="deleteItem(${t.id})" style="color:red; border:none; background:none; cursor:pointer;">刪除</button>
+                </div>
+            `,
+          )
+          .join("");
+        document.querySelector(".tab.active").innerText =
+          `全部 (${todos.length})`;
+      }
+
+      window.deleteItem = (id) => {
+        todos = todos.filter((t) => t.id !== id);
+        triggerAPI("DELETE", `/todos/${id}`, { message: "刪除成功" });
+        renderTodos();
+      };
+    </script>
+  </body>
+</html>

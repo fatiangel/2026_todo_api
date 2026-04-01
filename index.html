@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo API 教學工具 - 2026 六角後端版</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1 class="page-title">Todo API 教學工具</h1>
+
+    <div class="main-layout">
+      <section class="card todo-card">
+        <div class="card-header">
+          <h2>待辦事項</h2>
+          <button class="btn-text">登出</button>
+        </div>
+        <div class="input-group">
+          <input type="text" id="todo-input" placeholder="新增待辦事項..." />
+          <button id="add-btn">新增</button>
+        </div>
+        <div class="tab-group">
+          <button class="tab active" id="tab-all">全部 (0)</button>
+          <button class="tab">待完成 (0)</button>
+          <button class="tab">已完成 (0)</button>
+        </div>
+        <div id="todo-list" class="todo-list-container">
+          <p class="empty-text">還沒有待辦事項，新增一筆吧！</p>
+        </div>
+      </section>
+
+      <section class="card monitor-card">
+        <div class="card-header">
+          <h2>API 運作監控</h2>
+          <label class="slow-mode">慢速模式 <input type="checkbox" /></label>
+        </div>
+
+        <div class="endpoint-info">
+          <span class="label">API ENDPOINT</span>
+          <div class="badge"><span class="method">GET</span> /todos/</div>
+          <p class="api-url">https://todolist-api.hexschool.io</p>
+        </div>
+
+        <div class="visualizer">
+          <div class="node">🌐 瀏覽器</div>
+          <div class="line"><div id="dot" class="dot"></div></div>
+          <div class="node">🖥️ 伺服器</div>
+        </div>
+
+        <div class="response-box">
+          <span class="label">回應</span>
+          <pre id="json-display">{ "status": true, "data": [] }</pre>
+        </div>
+
+        <div class="history-box">
+          <span class="label">請求紀錄</span>
+          <ul id="log-list"></ul>
+        </div>
+      </section>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
