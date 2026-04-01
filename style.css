@@ -1,66 +1,334 @@
-let todos = [];
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
 
-// 核心函式：模擬 API 觸發監控面板
-function apiCall(method, path, data, status = 200) {
-    // 1. 動畫效果
-    const dot = document.getElementById('dot');
-    dot.style.left = "100%";
-    setTimeout(() => { dot.style.left = "0%"; }, 500);
-
-    // 2. 更新 JSON 顯示
-    const jsonDisplay = document.getElementById('json-display');
-    jsonDisplay.textContent = JSON.stringify({ status: true, data: data }, null, 2);
-
-    // 3. 增加紀錄
-    const logList = document.getElementById('log-list');
-    const logItem = document.createElement('li');
-    logItem.style.cssText = "display:flex; justify-content:space-between; font-size:0.8rem; padding:5px 0; border-bottom:1px solid #2d3748; list-style:none;";
-    logItem.innerHTML = `
-        <span><b style="color:#4299e1">${method}</b> ${path}</span>
-        <span style="color:#48bb78">${status} OK</span>
-    `;
-    logList.prepend(logItem);
+:root {
+  --primary: #769bf8;
+  --bg: #111827;
+  --card-dark: #1f2937;
+  --green: #10b981;
+  --text-gray-dark: #9ca3af;
+  --text-light-dark: #f3f4f6;
+  --method-get: #3b82f6;
+  --method-post: #10b981;
 }
 
-// 新增功能
-document.getElementById('add-btn').onclick = () => {
-    const input = document.getElementById('todo-input');
-    const content = input.value.trim();
-    if (!content) return;
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Noto Sans TC', sans-serif;
+  background-color: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
 
-    const newTodo = { id: Date.now(), content: content };
-    todos.push(newTodo);
-    
-    // 呼叫模擬 API
-    apiCall('POST', '/todos/', newTodo, 201);
-    
-    input.value = '';
-    render();
-};
+.page-container {
+  width: 100%;
+  max-width: 1000px;
+  padding: 20px;
+}
 
-// 刪除功能
-window.deleteTodo = (id) => {
-    todos = todos.filter(t => t.id !== id);
-    apiCall('DELETE', `/todos/${id}`, { message: "刪除成功" });
-    render();
-};
+.title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 24px;
+}
 
-// 渲染畫面
-function render() {
-    const list = document.getElementById('todo-list');
-    const count = document.getElementById('tab-all');
-    
-    count.innerText = `全部 (${todos.length})`;
+.layout {
+  display: flex;
+  gap: 20px;
+}
 
-    if (todos.length === 0) {
-        list.innerHTML = '<p class="empty-text" style="text-align:center; color:#a0aec0; margin-top:50px;">還沒有待辦事項，新增一筆吧！</p>';
-        return;
-    }
+.card {
+  flex: 1;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
 
-    list.innerHTML = todos.map(t => `
-        <div class="todo-item">
-            <span>${t.content}</span>
-            <button onclick="deleteTodo(${t.id})" style="color:#f56565; border:none; background:none; cursor:pointer;">刪除</button>
-        </div>
-    `).join('');
+.left-card {
+  background-color: #ffffff;
+  min-height: 500px;
+}
+
+.right-card {
+  background-color: #1a202c;
+  color: #d1d5db;
+  min-height: 500px;
+}
+
+/* Left Card styles */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header-row h2 {
+  font-size: 18px;
+  color: #111827;
+  margin: 0;
+}
+
+.logout-text {
+  font-size: 14px;
+  color: #9ca3af;
+  cursor: pointer;
+}
+
+.input-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.input-box {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+}
+
+.add-btn {
+  background-color: #7b99ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0 24px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tabs {
+  display: flex;
+  background-color: #f9fafb;
+  border-radius: 6px;
+  padding: 4px;
+  margin-bottom: 30px;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 13px;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.tab.active {
+  background-color: #ffffff;
+  color: #5a7bfa;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-weight: 500;
+}
+
+.empty-text {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+  margin-top: 50px;
+}
+
+/* Right Card styles */
+.right-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.right-header h2 {
+  font-size: 16px;
+  color: #f3f4f6;
+  margin: 0;
+}
+
+.slow-mode-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.toggle-bg {
+  width: 34px;
+  height: 18px;
+  background-color: #4b5563;
+  border-radius: 9px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.toggle-thumb {
+  width: 14px;
+  height: 14px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s;
+}
+
+.label {
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.endpoint-box {
+  margin-bottom: 16px;
+}
+
+.method {
+  background-color: #1e3a8a;
+  color: #93c5fd;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+  margin-right: 8px;
+  display: inline-block;
+}
+
+.method.post {
+  background-color: #065f46;
+  color: #6ee7b7;
+}
+
+.method.delete {
+  background-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+.path-text {
+  font-size: 15px;
+  font-family: monospace;
+  color: #f9fafb;
+}
+
+.url-text {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #10b981;
+  font-size: 12px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background-color: #10b981;
+  border-radius: 50%;
+}
+
+.network-graph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+  gap: 15px;
+}
+
+.network-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-box {
+  width: 50px;
+  height: 50px;
+  border: 1px solid #10b981;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #10b981;
+  font-size: 20px;
+}
+
+.node-text {
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.line {
+  flex: 1;
+  height: 2px;
+  background-color: #10b981;
+  position: relative;
+  top: -10px;
+  margin: 0 10px;
+  transition: background-color 0.3s;
+}
+
+.response-box {
+  background-color: #262e3d;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 30px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #10b981;
+  white-space: pre;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #374151;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.hist-method {
+  width: 50px;
+  display: inline-block;
+  font-weight: bold;
+}
+
+.hist-method.get { color: #60a5fa; }
+.hist-method.post { color: #34d399; }
+.hist-method.delete { color: #f87171; }
+
+.hist-path {
+  flex: 1;
+  color: #f3f4f6;
+}
+
+.hist-code {
+  color: #10b981;
+  margin-right: 15px;
+}
+
+.hist-time {
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .layout { flex-direction: column; }
 }

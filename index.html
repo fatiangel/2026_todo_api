@@ -1,64 +1,107 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Todo API 教學工具 - 2026 六角後端版</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <h1 class="page-title">Todo API 教學工具</h1>
-
-    <div class="main-layout">
-      <section class="card todo-card">
-        <div class="card-header">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo API 教學工具</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="page-container">
+    <div class="title">Todo API 教學工具</div>
+    <div class="layout">
+      <!-- 左側待辦清單 -->
+      <div class="card left-card">
+        <div class="header-row">
           <h2>待辦事項</h2>
-          <button class="btn-text">登出</button>
+          <span class="logout-text">登出</span>
         </div>
-        <div class="input-group">
-          <input type="text" id="todo-input" placeholder="新增待辦事項..." />
-          <button id="add-btn">新增</button>
+        <div class="input-container">
+          <input type="text" class="input-box" id="todo-input" placeholder="新增待辦事項...">
+          <button class="add-btn" id="add-btn">新增</button>
         </div>
-        <div class="tab-group">
-          <button class="tab active" id="tab-all">全部 (0)</button>
-          <button class="tab">待完成 (0)</button>
-          <button class="tab">已完成 (0)</button>
+        <div class="tabs">
+          <div class="tab active">全部 (<span id="count-all">0</span>)</div>
+          <div class="tab">待完成 (<span id="count-pending">0</span>)</div>
+          <div class="tab">已完成 (<span id="count-done">0</span>)</div>
         </div>
-        <div id="todo-list" class="todo-list-container">
-          <p class="empty-text">還沒有待辦事項，新增一筆吧！</p>
+        <div id="todo-list">
+          <div class="empty-text">還沒有待辦事項，新增一筆吧！</div>
         </div>
-      </section>
-
-      <section class="card monitor-card">
-        <div class="card-header">
+      </div>
+      <!-- 右側 API 監控 -->
+      <div class="card right-card">
+        <div class="right-header">
           <h2>API 運作監控</h2>
-          <label class="slow-mode">慢速模式 <input type="checkbox" /></label>
+          <div class="slow-mode-area">
+            慢速模式
+            <div class="toggle-bg" id="slow-mode-toggle-btn">
+              <div class="toggle-thumb" id="slow-mode-thumb"></div>
+            </div>
+          </div>
         </div>
-
-        <div class="endpoint-info">
+        <div class="endpoint-box">
           <span class="label">API ENDPOINT</span>
-          <div class="badge"><span class="method">GET</span> /todos/</div>
-          <p class="api-url">https://todolist-api.hexschool.io</p>
+          <div>
+            <span class="method" id="current-method">GET</span><span class="path-text" id="current-path">/todos/</span>
+          </div>
+          <div class="url-text">https://todolist-api.hexschool.io</div>
+          <div class="status-row">
+            <div class="dot"></div>
+            <span>完成</span>
+          </div>
         </div>
-
-        <div class="visualizer">
-          <div class="node">🌐 瀏覽器</div>
-          <div class="line"><div id="dot" class="dot"></div></div>
-          <div class="node">🖥️ 伺服器</div>
+        <div class="network-graph">
+          <div class="network-node">
+            <div class="icon-box">
+              <i class="fa-regular fa-window-maximize"></i>
+            </div>
+            <span class="node-text">瀏覽器</span>
+          </div>
+          <div class="line" id="connection-line"></div>
+          <div class="network-node">
+            <div class="icon-box">
+              <i class="fa-solid fa-server"></i>
+            </div>
+            <span class="node-text">伺服器</span>
+          </div>
         </div>
-
-        <div class="response-box">
+        <div>
           <span class="label">回應</span>
-          <pre id="json-display">{ "status": true, "data": [] }</pre>
+          <div class="response-box" id="json-response">
+<span style="color:#d1d5db">{</span>
+  <span style="color:#10b981">"status"</span><span style="color:#d1d5db">:</span> <span style="color:#60a5fa">true</span><span style="color:#d1d5db">,</span>
+  <span style="color:#10b981">"data"</span><span style="color:#d1d5db">: []</span>
+<span style="color:#d1d5db">}</span>
+          </div>
         </div>
-
-        <div class="history-box">
+        <div>
           <span class="label">請求紀錄</span>
-          <ul id="log-list"></ul>
+          <div id="history-container">
+            <div class="history-item">
+              <span class="hist-method get">GET</span>
+              <span class="hist-path">/todos/</span>
+              <span class="hist-code">200</span>
+              <span class="hist-time">1186ms</span>
+            </div>
+            <div class="history-item">
+              <span class="hist-method post">POST</span>
+              <span class="hist-path">/users/sign_in</span>
+              <span class="hist-code">200</span>
+              <span class="hist-time">1284ms</span>
+            </div>
+            <div class="history-item">
+              <span class="hist-method post">POST</span>
+              <span class="hist-path">/users/sign_up</span>
+              <span class="hist-code">201</span>
+              <span class="hist-time">1737ms</span>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
-
-    <script src="script.js"></script>
-  </body>
+  </div>
+  <script src="script.js"></script>
+</body>
 </html>
