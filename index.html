@@ -15,16 +15,20 @@
       <div class="card left-card">
         <div class="header-row">
           <h2>待辦事項</h2>
-          <span class="logout-text">登出</span>
+          <div>
+            <button id="export-btn" style="margin-right: 12px; padding: 4px 12px; cursor: pointer; border: 1px solid #e5e7eb; border-radius: 4px; background: white; font-size: 14px; transition: all 0.2s;"><i class="fa-solid fa-download"></i> 匯出 store.json</button>
+            <span class="logout-text">登出</span>
+          </div>
         </div>
         <div class="input-container">
           <input type="text" class="input-box" id="todo-input" placeholder="新增待辦事項...">
+          <input type="date" class="input-box" id="todo-date" style="width: 140px; margin-left: 8px;">
           <button class="add-btn" id="add-btn">新增</button>
         </div>
         <div class="tabs">
-          <div class="tab active">全部 (<span id="count-all">0</span>)</div>
-          <div class="tab">待完成 (<span id="count-pending">0</span>)</div>
-          <div class="tab">已完成 (<span id="count-done">0</span>)</div>
+          <div class="tab active" id="tab-all" data-tab="all" style="cursor:pointer;">全部 (<span id="count-all">0</span>)</div>
+          <div class="tab" id="tab-pending" data-tab="pending" style="cursor:pointer;">待完成 (<span id="count-pending">0</span>)</div>
+          <div class="tab" id="tab-done" data-tab="done" style="cursor:pointer;">已完成 (<span id="count-done">0</span>)</div>
         </div>
         <div id="todo-list">
           <div class="empty-text">還沒有待辦事項，新增一筆吧！</div>

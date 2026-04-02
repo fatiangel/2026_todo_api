@@ -1,6 +1,8 @@
 let todos = [];
+let currentTab = 'all';
 
 const todoInput = document.getElementById('todo-input');
+const todoDate = document.getElementById('todo-date');
 const addBtn = document.getElementById('add-btn');
 const todoList = document.getElementById('todo-list');
 const historyContainer = document.getElementById('history-container');
@@ -11,20 +13,35 @@ const countAll = document.getElementById('count-all');
 const countPending = document.getElementById('count-pending');
 const countDone = document.getElementById('count-done');
 
+if (todoDate) {
+  todoDate.value = new Date().toISOString().split('T')[0];
+}
+
 // Render initial state
 function renderTodos() {
-  countAll.textContent = todos.length;
-  countPending.textContent = todos.length; // Simplified for this demo
-  countDone.textContent = 0;
+  const pendingCount = todos.filter(t => !t.completed).length;
+  const doneCount = todos.filter(t => t.completed).length;
   
-  if (todos.length === 0) {
-    todoList.innerHTML = '<div class="empty-text">還沒有待辦事項，新增一筆吧！</div>';
+  countAll.textContent = todos.length;
+  countPending.textContent = pendingCount;
+  countDone.textContent = doneCount;
+  
+  let filteredTodos = todos;
+  if (currentTab === 'pending') filteredTodos = todos.filter(t => !t.completed);
+  if (currentTab === 'done') filteredTodos = todos.filter(t => t.completed);
+  
+  if (filteredTodos.length === 0) {
+    todoList.innerHTML = '<div class="empty-text">目前沒有待辦事項！</div>';
     return;
   }
   
-  todoList.innerHTML = todos.map(t => `
+  todoList.innerHTML = filteredTodos.map(t => `
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; color: #4b5563;">
-      <span>${t.content}</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTodo(${t.id})" style="cursor: pointer; width: 16px; height: 16px;">
+        <span style="${t.completed ? 'text-decoration: line-through; color: #9ca3af;' : ''}">${t.content}</span>
+        ${t.date ? `<span style="font-size: 12px; color: #6b7280; background: #e5e7eb; padding: 2px 6px; border-radius: 4px;">${t.date}</span>` : ''}
+      </div>
       <button onclick="deleteTodo(${t.id})" style="background: none; border: none; color: #ef4444; cursor: pointer; display: flex; align-items: center; padding: 4px;"> <i class="fa-solid fa-xmark"></i> <span style="margin-left:4px;">刪除</span></button>
     </div>
   `).join('');
@@ -72,11 +89,13 @@ function updateAPIStatus(method, path, data, status) {
 // Add Item
 addBtn.addEventListener('click', () => {
   const content = todoInput.value.trim();
+  const dateVal = todoDate ? todoDate.value : '';
   if (!content) return;
   
   const newItem = {
     id: Date.now(),
     content: content,
+    date: dateVal,
     completed: false
   };
   
@@ -94,6 +113,16 @@ window.deleteTodo = (id) => {
   renderTodos();
 };
 
+// Toggle Item
+window.toggleTodo = (id) => {
+  const todo = todos.find(t => t.id === id);
+  if (todo) {
+    todo.completed = !todo.completed;
+    updateAPIStatus('PATCH', `/todos/${id}`, { completed: todo.completed }, 200);
+    renderTodos();
+  }
+};
+
 // Toggle switch
 const toggleBg = document.getElementById('slow-mode-toggle-btn');
 const toggleThumb = document.getElementById('slow-mode-thumb');
@@ -109,5 +138,33 @@ toggleBg.addEventListener('click', () => {
   }
 });
 
+// Export to store.json
+const exportBtn = document.getElementById('export-btn');
+if (exportBtn) {
+  exportBtn.addEventListener('click', () => {
+    const dataStr = JSON.stringify(todos, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'store.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+}
+
 // Setup mock initially
 renderTodos();
+
+// Tabs switching logic
+const tabs = document.querySelectorAll('.tab');
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentTab = tab.getAttribute('data-tab');
+    renderTodos();
+  });
+});
